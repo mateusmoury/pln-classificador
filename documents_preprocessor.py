@@ -10,13 +10,27 @@ def stem(tokens):
 
 # Recebe o mapa contendo os documentos, como definido no sgml_parser, e retorna lista de pares de treinamento (texto, classes)
 def preprocess_training_documents(documents):
-  text_wrapper = []
+  test_set = []
+  id_to_text = {}
+  class_to_ids = {}
+
   punctuation = [',', ';', '.', ':', '.', '!', '?', '\"', '*', '\'', '(', ')', '-', '>', '<']
   for document_id, document_info in documents.items():
-    if document_info['split'] == "TRAIN" and 'body' in document_info['text']:
+
+    if 'body' in document_info['text']:
       text = stem(remove_stopwords(nltk.word_tokenize(document_info['text']['body'])))
       text = list(filter(lambda word: word not in punctuation, text))
       classes = document_info['topics']
-      if len(classes) > 0:
-        text_wrapper.append((text, classes))
-  return text_wrapper
+
+      if document_info['split'] == "TRAIN":
+        id_to_text[document_id] = text
+        for topic in classes:
+          if topic in class_to_ids:
+            class_to_ids[topic].append(document_id)
+          else:
+            class_to_ids[topic] = [document_id]
+
+      elif document_info['split'] == "TEST":
+        test_set.append((text, classes))
+
+  return { 'test_set': test_set, 'id_to_text': id_to_text, 'class_to_ids': class_to_ids }
