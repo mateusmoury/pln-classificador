@@ -10,8 +10,7 @@ test_set: [(text, [class_names])]
 
 def BinaryClassifier:
 
-  def __init__(self, class_name, id_to_text, pos_examples, neg_examples):
-    self._class_name = class_name
+  def __init__(self, id_to_text, pos_examples, neg_examples):
     self.train(id_to_text, pos_examples, neg_examples)
     pass
 
@@ -33,16 +32,16 @@ def NAryClassifier:
     for class_name in class_to_ids:
       self._class_names.append(class_name)
       pos_examples = class_to_ids[class_name]
-      neg_examples = [id_exmp for id_exmp, _ in id_to_text.items(): if id_exmp not in pos_examples]
-      self._classifiers[class_name] = BinaryClassifier(class_name, id_to_text, pos_examples, neg_examples)
+      neg_examples = [id_exmp for id_exmp in id_to_text.keys(): if id_exmp not in pos_examples]
+      self._classifiers[class_name] = BinaryClassifier(id_to_text, pos_examples, neg_examples)
 
 
   def get_classes_for_text(self, text):
     ''' Returns a list containing the classes' names to which this text belongs. '''
     ret = []
-    for classifier in self._classifiers:
+    for class_name, classifier in self._classifiers.items():
       if classifier.classify(text):
-        ret.append(classifier._class_name)
+        ret.append(class_name)
     return ret
 
 
@@ -54,17 +53,17 @@ def NAryClassifier:
     fn = {class_name: 0.0 for class_name in self._class_names}
 
     for (text, classes) in test_set:
-      for classifier in self._classifiers:
+      for class_name, classifier in self._classifiers.items():
         if classifier.classify(text):
-          if classifier._class_name in classes:
-            tp[classifier._class_name] += 1.0
+          if class_name in classes:
+            tp[class_name] += 1.0
           else:
-            fp[classifier._class_name] += 1.0
+            fp[class_name] += 1.0
         else:
-          if classifier._class_name in classes:
-            fn[classifier._class_name] += 1.0
+          if class_name in classes:
+            fn[class_name] += 1.0
           else:
-            tn[classifier._class_name] += 1.0
+            tn[class_name] += 1.0
 
     # macro average
     precision, recall, accuracy = 0.0, 0.0, 0.0
