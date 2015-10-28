@@ -11,6 +11,10 @@ test_set: [(text, [class_names])]
 def BinaryClassifier:
 
   def __init__(self, id_to_text, pos_examples, neg_examples):
+    self._word_freq = {'pos' : {}, 'neg' : {}}
+    self._vocabulary = set()
+    self._prob_class = {'pos' : len(pos_examples) / (len(pos_examples) + len(neg_examples)),
+                        'neg' : len(neg_examples) / (len(pos_examples) + len(neg_examples))}
     self.train(id_to_text, pos_examples, neg_examples)
     pass
 
@@ -22,7 +26,13 @@ def BinaryClassifier:
 
   def classify(self, text):
     ''' Returns True if this text belongs to this class and False otherwise. '''
-    pass
+    from math import log
+    prob = {'pos' : log(self._prob_class['pos']),
+            'neg' : log(self._prob_class['neg'])}
+    for token in text:
+      for c in prob:
+        prob[c] += log(self._word_freq[c][token] + 1) - log(sum(self._word_freq[c].values()) + len(self._vocabulary))
+    return prob['pos'] > prob['neg']
 
 def NAryClassifier:
 
