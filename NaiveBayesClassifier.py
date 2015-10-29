@@ -151,7 +151,7 @@ class NAryClassifier:
     return {'micro' : micro, 'macro' : macro}
 
 
-def main():
+if __name__ == '__main__':
   class_to_ids = {'c' : [1, 2, 3], 'j' : [4]}
   id_to_text = {1: ["chinese", "beijing", "chinese"],
                 2: ["chinese", "chinese", "shangai"],
@@ -163,5 +163,3 @@ def main():
   print(classifier.get_classes_for_text(txt))
   test_set = [(txt, ["c"])]
   print(classifier.get_metrics(test_set))
-
-main()
