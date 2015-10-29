@@ -2,7 +2,6 @@ from sgml_parser import get_documents_from_sgml
 from documents_preprocessor import preprocess_training_documents
 import NaiveBayesClassifier
 
-
 if __name__ == '__main__':
 	print("begin parser")
 	documents = get_documents_from_sgml()
