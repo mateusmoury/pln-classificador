@@ -1,16 +1,11 @@
-'''
-text: abbreviation for [tokens]
-id: integer
-class_to_ids: map {'class_name' : [id]}
-id_to_text: map {'id' : text}
-pos_examples: [id]
-neg_examples: [id]
-test_set: [(text, [class_names])]
-'''
-
 class BinaryClassifier:
 
   def __init__(self, id_to_text, pos_examples, neg_examples):
+    '''
+        id_to_text: {text_id : [token]}
+        pos_examples: set(text_id)
+        neg_examples: set(text_id)
+    '''
     self._word_freq = {'pos' : {}, 'neg' : {}}
     self._vocabulary = set()
     self._prob_class = {'pos' : len(pos_examples) / (len(pos_examples) + len(neg_examples)),
@@ -19,7 +14,12 @@ class BinaryClassifier:
 
 
   def train(self, id_to_text, pos_examples, neg_examples):
-    ''' Trains this classifier. '''
+    ''' Trains this classifier.
+
+        id_to_text: {text_id: [token]}
+        pos_examples: set(text_id)
+        neg_examples: set(text_id)
+    '''
     for id_exmp in pos_examples:
       for token in id_to_text[id_exmp]:
         self._vocabulary.add(token)
@@ -38,7 +38,10 @@ class BinaryClassifier:
 
 
   def classify(self, text):
-    ''' Returns True if this text belongs to this class and False otherwise. '''
+    ''' Returns True if this text belongs to this class and False otherwise.
+
+        text: [token]
+    '''
     from math import log
     prob = {'pos' : log(self._prob_class['pos']),
             'neg' : log(self._prob_class['neg'])}
@@ -56,17 +59,24 @@ class BinaryClassifier:
 class NAryClassifier:
 
   def __init__(self, class_to_ids, id_to_text):
+    '''
+        class_to_ids: {class_name: set(text_id)}
+        id_to_text: {text_id: [token]}
+    '''
     self._classifiers = {}
-    self._class_names = []
+    self._class_names = set()
     for class_name in class_to_ids:
-      self._class_names.append(class_name)
+      self._class_names.add(class_name)
       pos_examples = class_to_ids[class_name]
-      neg_examples = [id_exmp for id_exmp in id_to_text.keys() if id_exmp not in pos_examples]
+      neg_examples = set([id_exmp for id_exmp in id_to_text.keys() if id_exmp not in pos_examples])
       self._classifiers[class_name] = BinaryClassifier(id_to_text, pos_examples, neg_examples)
 
 
   def get_classes_for_text(self, text):
-    ''' Returns a list containing the classes' names to which this text belongs. '''
+    ''' Returns a list containing the classes' names to which this text belongs.
+
+        text: [token]
+    '''
     ret = []
     for class_name, classifier in self._classifiers.items():
       if classifier.classify(text):
@@ -75,16 +85,16 @@ class NAryClassifier:
 
 
   def get_metrics(self, test_set):
-    ''' Returns the metrics: precision, recall, accuracy and f1, for both micro and macro averaging. '''
+    ''' Returns the metrics: precision, recall, accuracy and f1, for both micro and macro averaging.
+
+        test_set: [([token], set(class_name))]
+    '''
     tp = {class_name: 0 for class_name in self._class_names}
     fp = {class_name: 0 for class_name in self._class_names}
     tn = {class_name: 0 for class_name in self._class_names}
     fn = {class_name: 0 for class_name in self._class_names}
 
-    num = 0
     for (text, classes) in test_set:
-      num += 1
-      print("avaliando texto #" + str(num))
       for class_name, classifier in self._classifiers.items():
         if classifier.classify(text):
           if class_name in classes:
@@ -96,11 +106,6 @@ class NAryClassifier:
             fn[class_name] += 1
           else:
             tn[class_name] += 1
-
-    print("tp: " + str(tp))
-    print("fn: " + str(fn))
-    print("tn: " + str(tn))
-    print("fp: " + str(fp))
 
     # macro average
     precision, recall, accuracy = 0.0, 0.0, 0.0
@@ -156,7 +161,7 @@ class NAryClassifier:
 
 
 if __name__ == '__main__':
-  class_to_ids = {'c' : [1, 2, 3], 'j' : [4]}
+  class_to_ids = {'c' : set([1, 2, 3]), 'j' : set([4])}
   id_to_text = {1: ["chinese", "beijing", "chinese"],
                 2: ["chinese", "chinese", "shangai"],
                 3: ["chinese", "macao"],
