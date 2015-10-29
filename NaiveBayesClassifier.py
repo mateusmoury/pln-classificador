@@ -42,13 +42,14 @@ class BinaryClassifier:
     from math import log
     prob = {'pos' : log(self._prob_class['pos']),
             'neg' : log(self._prob_class['neg'])}
-    for token in text:
-      for c in prob:
-        if token in self._word_freq[c]:
+    for c in prob:
+      denominator = log(sum(self._word_freq[c].values()) + len(self._vocabulary))
+      for token in text:
+        try:
           f = self._word_freq[c][token]
-        else:
+        except:
           f = 0
-        prob[c] += log(f + 1) - log(sum(self._word_freq[c].values()) + len(self._vocabulary))
+        prob[c] += log(f + 1) - denominator
     return prob['pos'] > prob['neg']
 
 
@@ -80,7 +81,10 @@ class NAryClassifier:
     tn = {class_name: 0 for class_name in self._class_names}
     fn = {class_name: 0 for class_name in self._class_names}
 
+    num = 0
     for (text, classes) in test_set:
+      num += 1
+      print("avaliando texto #" + str(num))
       for class_name, classifier in self._classifiers.items():
         if classifier.classify(text):
           if class_name in classes:
