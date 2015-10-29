@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import os
 
 def relevant_topic(topic):
-  return topic in ["acq", "earn", "money-fx", "grain", "crude", "trade", "interest", "ship", "wheat", "corn"]
+  return topic in set(["acq", "earn", "money-fx", "grain", "crude", "trade", "interest", "ship", "wheat", "corn"])
 
 def get_documents_from_sgml():
   documents = {}
