@@ -120,12 +120,16 @@ class NAryClassifier:
       else:
         recall += 1
 
-      accuracy += (tp[class_name] + tn[class_name]) / (tp[class_name] + tn[class_name] + fn[class_name] + fp[class_name])
+      if tp[class_name] + tn[class_name] + fn[class_name] + fp[class_name] != 0:
+        accuracy += (tp[class_name] + tn[class_name]) / (tp[class_name] + tn[class_name] + fn[class_name] + fp[class_name])
 
     precision /= len(self._class_names)
     recall /= len(self._class_names)
     accuracy /= len(self._class_names)
-    f1 = 2.0 * precision * recall / (precision + recall)
+    if precision + recall != 0:
+      f1 = 2.0 * precision * recall / (precision + recall)
+    else:
+      f1 = 0
 
     macro = {'precision' : precision,
              'recall'    : recall,
@@ -148,7 +152,10 @@ class NAryClassifier:
     else:
       recall = 1.0
 
-    accuracy = (tp_sum + tn_sum) / (tp_sum + fn_sum + tn_sum + fp_sum)
+    if tp_sum + fn_sum + tn_sum + fp_sum != 0:
+      accuracy = (tp_sum + tn_sum) / (tp_sum + fn_sum + tn_sum + fp_sum)
+    else:
+      accuracy = 0
 
     if precision + recall != 0:
       f1 = 2.0 * precision * recall / (precision + recall)
