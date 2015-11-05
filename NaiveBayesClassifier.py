@@ -150,7 +150,10 @@ class NAryClassifier:
 
     accuracy = (tp_sum + tn_sum) / (tp_sum + fn_sum + tn_sum + fp_sum)
 
-    f1 = 2.0 * precision * recall / (precision + recall)
+    if precision + recall != 0:
+      f1 = 2.0 * precision * recall / (precision + recall)
+    else:
+      f1 = 0
 
     micro = {'precision' : precision,
              'recall'    : recall,
